@@ -1,0 +1,11 @@
+<html>
+<body>
+  <pre id="data"></pre>
+  <script>
+    chrome.storage.local.get(null, (data) => {
+      document.getElementById("data").textContent =
+        JSON.stringify(data, null, 2);
+    });
+  </script>
+</body>
+</html>

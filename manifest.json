@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Xalaflix Episode Tracker",
+  "version": "1.0",
+  "description": "Suivi automatique des épisodes vus sur Xalaflix",
+  "permissions": [
+  "storage",
+  "activeTab"
+  ],
+  "action": {
+  "default_title": "Debug",
+  "default_popup": "debug.html"
+  },
+  "host_permissions": [
+  "https://xalaflix.men/*",
+  "https://xalaflix.fr/*",
+  "https://xalaflix.*/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://xalaflix.men/*"],
+      "js": ["content.js"]
+    }
+  ]
+
+}

@@ -1,0 +1,140 @@
+// -----------------------------
+// Crée le wrapper et les boutons (toujours visibles)
+// -----------------------------
+function createWrapperAndButtons() {
+    let wrapper = document.getElementById("episode-tracker-wrapper");
+    if (!wrapper) {
+        wrapper = document.createElement("div");
+        wrapper.id = "episode-tracker-wrapper";
+        wrapper.style.cssText = `
+        position: fixed;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        z-index: 999999;
+        `;
+        document.body.appendChild(wrapper);
+
+        // Badge
+        const badge = document.createElement("div");
+        badge.id = "episode-tracker-badge";
+        badge.style.cssText = `
+        background: #27ae60;
+        color: white;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 14px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        `;
+        wrapper.appendChild(badge);
+
+        // Bouton ➕ pour marquer la page comme vue
+        addPlusButton(wrapper);
+
+        // Bouton 🗑 pour retirer la page du suivi
+        addTrashButton(wrapper);
+    }
+    return wrapper;
+}
+
+// -----------------------------
+// Vérifie si la page est vue et met à jour le badge
+// -----------------------------
+function tryDetect() {
+    chrome.storage.local.get(["seenUrls"], (data) => {
+        const seen = data.seenUrls || [];
+        const badge = document.getElementById("episode-tracker-badge");
+        if (seen.includes(location.pathname)) {
+            badge.textContent = "✔ Vu";
+        } else {
+            badge.textContent = "A regarder";
+        }
+    });
+}
+
+// -----------------------------
+// Bouton ➕ pour ajouter la page au suivi
+// -----------------------------
+function addPlusButton(wrapper) {
+    if (document.getElementById("plus-episode-btn")) return;
+
+    const btn = document.createElement("button");
+    btn.id = "plus-episode-btn";
+    btn.textContent = "➕";
+    btn.title = "Marquer cette page comme vue";
+    btn.style.cssText = `
+    padding: 4px 8px;
+    font-size: 12px;
+    border: none;
+    border-radius: 6px;
+    background: #3498db;
+    color: white;
+    cursor: pointer;
+    `;
+
+    btn.onclick = () => {
+        chrome.storage.local.get(["seenUrls"], (data) => {
+            const seen = data.seenUrls || [];
+            if (!seen.includes(location.pathname)) seen.push(location.pathname);
+            chrome.storage.local.set({ seenUrls: seen }, () => {
+                tryDetect();
+            });
+        });
+    };
+
+    wrapper.appendChild(btn);
+}
+
+// -----------------------------
+// Bouton 🗑 pour retirer la page du suivi
+// -----------------------------
+function addTrashButton(wrapper) {
+    if (document.getElementById("trash-episode-btn")) return;
+
+    const btn = document.createElement("button");
+    btn.id = "trash-episode-btn";
+    btn.textContent = "🗑";
+    btn.title = "Retirer cette page du suivi";
+    btn.style.cssText = `
+    padding: 4px 8px;
+    font-size: 12px;
+    border: none;
+    border-radius: 6px;
+    background: #e74c3c;
+    color: white;
+    cursor: pointer;
+    `;
+
+    btn.onclick = () => {
+        chrome.storage.local.get(["seenUrls"], (data) => {
+            let seen = data.seenUrls || [];
+            seen = seen.filter(url => url !== location.pathname);
+            chrome.storage.local.set({ seenUrls: seen }, () => {
+                tryDetect();
+            });
+        });
+    };
+
+    wrapper.appendChild(btn);
+}
+
+// -----------------------------
+// SPA-safe : surveille les changements d'URL
+// -----------------------------
+let lastUrl = location.href;
+setInterval(() => {
+    if (location.href !== lastUrl) {
+        lastUrl = location.href;
+        tryDetect();
+    }
+}, 500);
+
+// -----------------------------
+// Lancement initial
+// -----------------------------
+createWrapperAndButtons();
+tryDetect();

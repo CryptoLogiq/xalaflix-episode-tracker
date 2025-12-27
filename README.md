@@ -51,4 +51,4 @@ Feel free to open issues or pull requests to improve the extension, add new feat
 
 ## License / Licence
 
-MIT License © Your Name
+MIT License © Crypto Logiq
